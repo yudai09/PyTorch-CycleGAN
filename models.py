@@ -62,27 +62,22 @@ class Generator(nn.Module):
         return self.model(x)
 
 class Discriminator(nn.Module):
-    def __init__(self, input_nc):
+    def __init__(self, input_nc, layers):
         super(Discriminator, self).__init__()
 
         # A bunch of convolutions one after another
-        model = [   nn.Conv2d(input_nc, 64, 4, stride=2, padding=1),
+        channel = 64
+        model = [   nn.Conv2d(input_nc, channel, 4, stride=2, padding=1),
                     nn.LeakyReLU(0.2, inplace=True) ]
 
-        model += [  nn.Conv2d(64, 128, 4, stride=2, padding=1),
-                    nn.InstanceNorm2d(128), 
-                    nn.LeakyReLU(0.2, inplace=True) ]
-
-        model += [  nn.Conv2d(128, 256, 4, stride=2, padding=1),
-                    nn.InstanceNorm2d(256), 
-                    nn.LeakyReLU(0.2, inplace=True) ]
-
-        model += [  nn.Conv2d(256, 512, 4, padding=1),
-                    nn.InstanceNorm2d(512), 
-                    nn.LeakyReLU(0.2, inplace=True) ]
+        for _ in range(layers-2):
+            model += [  nn.Conv2d(channel, channel * 2, 4, stride=2, padding=1),
+                        nn.InstanceNorm2d(channel * 2),
+                        nn.LeakyReLU(0.2, inplace=True) ]
+            channel *= 2
 
         # FCN classification layer
-        model += [nn.Conv2d(512, 1, 4, padding=1)]
+        model += [nn.Conv2d(channel, 1, 4, padding=1)]
 
         self.model = nn.Sequential(*model)
 

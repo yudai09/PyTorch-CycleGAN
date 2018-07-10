@@ -29,18 +29,23 @@ parser.add_argument('--input_nc', type=int, default=3, help='number of channels 
 parser.add_argument('--output_nc', type=int, default=3, help='number of channels of output data')
 parser.add_argument('--cuda', action='store_true', help='use GPU computation')
 parser.add_argument('--n_cpu', type=int, default=8, help='number of cpu threads to use during batch generation')
+parser.add_argument('--layers_discriminator', type=int, default=5, help='number of layers for discriminator\'s network.')
 opt = parser.parse_args()
 print(opt)
 
 if torch.cuda.is_available() and not opt.cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
+
+assert(opt.layers_discriminator >= 3)
+
 ###### Definition of variables ######
 # Networks
 netG_A2B = Generator(opt.input_nc, opt.output_nc)
 netG_B2A = Generator(opt.output_nc, opt.input_nc)
-netD_A = Discriminator(opt.input_nc)
-netD_B = Discriminator(opt.output_nc)
+netD_A = Discriminator(opt.input_nc, opt.layers_discriminator)
+netD_B = Discriminator(opt.output_nc, opt.layers_discriminator)
+print(netD_A)
 
 if opt.cuda:
     netG_A2B.cuda()
